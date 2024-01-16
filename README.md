@@ -32,9 +32,9 @@ You will overload the << operator to enable the display of plot information on t
 For now, let's assume that the shapes of the plots are described by non-intersecting polygons. An exception should be raised if the polygon describing the plot is intersecting, but it is not requested at the moment. However, you must raise exceptions if the area of a plot is negative or zero.
 The area of a polygon with integer or real coordinates is calculated from the list of coordinates of the points constituting the vertices of the Polygon in the counterclockwise direction using the formula:
 
-\[
+$$
 \text{{Area}} = \frac{1}{2} \sum_{i=0}^{n-1} (x_i y_{i+1} - x_{i+1} y_i)
-\]
+$$
 
 ![Alt text](readme_sources/image2.png)
 Class diagram of the Plot class
