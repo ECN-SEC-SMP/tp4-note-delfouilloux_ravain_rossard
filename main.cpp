@@ -41,8 +41,12 @@ int main()
 
     cout << poly0 << endl;
 
+    Polygon<int, float> poly0bis(poly0);
+
     poly0.translate(-1, -1);
 
+    cout << poly0bis << endl;
+    
     cout << poly0 << endl;
 
     //Test UrbanZone
@@ -93,7 +97,7 @@ int main()
     cout << n0 << endl;
 
     //Test textToPlots
-    vector<Plot*> plots = textToPlots("./plots/plots.txt");
+    vector<Plot*> plots = textToPlots("./plots/plots_short.txt");
     for (auto plot : plots)
     {
         switch (plot->getType())

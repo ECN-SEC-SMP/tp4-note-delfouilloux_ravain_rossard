@@ -115,7 +115,7 @@ class ZoneToBeUrbanized : public Buildable
 };
 
 /**
- * @brief ZN are not buildable but have additional characteristics like the type of cultivated crop
+ * @brief ZN are not buildable
  */
 class NaturalAndForestZone : public virtual Plot
 {
@@ -128,7 +128,7 @@ class NaturalAndForestZone : public virtual Plot
 };
 
 /**
- * @brief On ZA, a farmer can build agricultural buildings as long as the built surface area does not exceed 10% of the total area and a maximum of 200m2
+ * @brief On ZA, a farmer can build agricultural buildings as long as the built surface area does not exceed 10% of the total area and a maximum of 200m2. The ZA also has additional characteristics like the type of cultivated crop
  */
 class AgriculturalZone : public NaturalAndForestZone, public Buildable
 {
