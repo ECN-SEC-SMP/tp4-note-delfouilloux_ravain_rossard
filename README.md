@@ -88,3 +88,14 @@ You will find two examples of backup files in Parcelle_short.txt and Parcelle.tx
 Figure 4 - Map described in the Parcelle.txt file
 
 You must also enable the saving of a Map to a backup file. Complete your previous class diagram with the Map class.
+
+## More algorithmy - Bonus
+
+### Raise an exception for a polygon with points not in counterclockwise order
+To check if a list of points is in counterclockwise orientation, look for the point at the bottom left. The scalar product of the vectors formed by this point (O) and the two next points in the list ($P_i$ and $P_{i+1}$) must be positive:
+($\vec{OP_i} \cdot \vec{OP_{i+1}} > 0$). 
+Implement this algorithm and raise an exception if the list of points is not in counterclockwise orientation.
+
+### Raise an exception for a polygon with intersecting edges
+To check if a polygon has intersecting edges, you can, for each edge, check if it intersects with the other edges. If an edge intersects with another edge, the polygon has intersecting edges and an exception should be raised. This exception should be raised when the polygon is constructed, but also when the polygon is modified (for example, when a point is added to the polygon).
+

@@ -38,7 +38,6 @@ int main()
     Polygon<int, float> poly0;
     vector<Point2D<int, float>> vertices = {p1, p2, p3};
     poly0.setVertices(vertices);
-    poly0.addVertex(p4);
 
     cout << poly0 << endl;
 
@@ -48,7 +47,9 @@ int main()
 
     //Test UrbanZone
     int pbuildable = rand() % 100;
-    UrbanZone u0(1, "Bastien", poly0, pbuildable);
+    UrbanZone u0(1, "Bastien", &poly0, pbuildable, 100);
+    cout << u0 << endl;
+    poly0.addVertex(p4);
     cout << u0 << endl;
 
     //Test ZoneToBeUrbanized
@@ -62,7 +63,7 @@ int main()
     poly1.setVertices(vertices1);
 
     pbuildable = rand() % 100;
-    ZoneToBeUrbanized z0(2, "Bastien", poly1, pbuildable);
+    ZoneToBeUrbanized z0(2, "Bastien", &poly1, pbuildable);
     cout << z0 << endl;
 
     //Test AgriculturalZone
@@ -75,7 +76,7 @@ int main()
     vector<Point2D<int, float>> vertices3 = {p13, p14, p15, p16};
     poly3.setVertices(vertices3);
 
-    AgriculturalZone a0(4, "Bastien", poly3, "Wheat");
+    AgriculturalZone a0(4, "Bastien", &poly3, "Wheat");
     cout << a0 << endl;
 
     //Test NaturalAndForestZone
@@ -88,7 +89,7 @@ int main()
     vector<Point2D<int, float>> vertices2 = {p9, p10, p11, p12};
     poly2.setVertices(vertices2);
 
-    NaturalAndForestZone n0(3, "Bastien", poly2);
+    NaturalAndForestZone n0(3, "Bastien", &poly2);
     cout << n0 << endl;
 
     //Test textToPlots
@@ -120,10 +121,9 @@ int main()
     
 }
 
-Polygon<int, float> createPolygons(string &line){
+Polygon<int, float>* createPolygons(string &line){
     stringstream ss(line); // get the coordinates
-    int x;
-    int y;
+    int x, y;
     char ch;
     vector<Point2D<int, float>> vertices;
     while (ss >> ch)
@@ -133,8 +133,8 @@ Polygon<int, float> createPolygons(string &line){
         Point2D<int, float> p(x, y);
         vertices.push_back(p);
     }
-    Polygon<int, float> shape;
-    shape.setVertices(vertices);
+    Polygon<int, float>* shape = new Polygon<int, float>();
+    shape->setVertices(vertices);
     return shape;
 }
 
@@ -147,13 +147,9 @@ vector<Plot*> textToPlots(string filename)
 {
     vector<Plot*> plots;
     ifstream file(filename);
-    string line;
-    int number;
-    string owner;
-    string type;
-    int pBuildable;
+    string line, owner, type, crop;
+    int number, pBuildable;
     float builtArea;
-    string crop;
 
     if (file.is_open())
     {
@@ -162,10 +158,10 @@ vector<Plot*> textToPlots(string filename)
             stringstream ss(line);
             ss >> type >> number >> owner;
             getline(file, line);
-            Polygon<int, float> shape = createPolygons(line);
+            Polygon<int, float>* shape = createPolygons(line);
             if (type == "ZU")
             {
-                ss >> pBuildable >> builtArea >> crop;
+                ss >> pBuildable >> builtArea >> builtArea;
                 UrbanZone* u = new UrbanZone(number, owner, shape, pBuildable, builtArea);
                 plots.push_back(u);
             }
@@ -232,7 +228,7 @@ void plotsToText(vector<Plot*> plots){
                     break;
             }
             file << "\n";
-            for (auto vertex : plot->getShape().getVertices())
+            for (auto vertex : plot->getShape()->getVertices())
             {
                 file << "[" << vertex.getX() << ";" << vertex.getY() << "] ";
             }

@@ -37,12 +37,15 @@ string PlotTypeToString(PlotType type) {
  * @param shape 
  * @param pBuildable 
  */
-Plot::Plot(int number, string owner, Polygon<int,float> shape, int pBuildable)
+Plot::Plot(int number, string owner, Polygon<int,float>* shape, int pBuildable) 
 {
     this->number = number;
     this->owner = owner;
-    this->setShape(shape);
+    this->shape = shape;
     this->pBuildable = pBuildable;
+    this->calculateArea();
+
+    this->shape->addObserver([this]() { this->calculateArea(); });
 }
 
 /**
@@ -57,6 +60,8 @@ Plot::Plot(const Plot& p)
     this->shape = p.shape;
     this->area = p.area;
     this->pBuildable = p.pBuildable;
+
+    this->shape->addObserver([this]() { this->calculateArea(); }); 
 }
 
 /**
@@ -100,9 +105,9 @@ float Plot::getArea() const
 /**
  * @brief Get the shape of the plot
  * 
- * @return Polygon<int,float> 
+ * @return Polygon<int,float>* 
  */
-Polygon<int,float> Plot::getShape() const
+Polygon<int,float>* Plot::getShape() const
 {
     return this->shape;
 }
@@ -128,24 +133,22 @@ void Plot::setOwner(string owner)
 }
 
 /**
- * @brief Set the shape of the plot. Also computes the area of the plot and throws an error if the area is negative or null
+ * @brief Calculate the area of the plot
  * 
- * @param shape 
  */
-void Plot::setShape(Polygon<int,float> shape)
+void Plot::calculateArea()
 {
-    this->shape = shape;
     try{
         float area = 0;
-        for (int i = 0; i < this->shape.getVertices().size(); i++)
+        for (int i = 0; i < this->shape->getVertices().size(); i++)
         {
-            if (i == this->shape.getVertices().size() - 1) //if we are at the last vertex, we need to use the first vertex as the second point
+            if (i == this->shape->getVertices().size() - 1) //if we are at the last vertex, we need to use the first vertex as the second point
             {
-                area += (this->shape.getVertices()[i].getX() * this->shape.getVertices()[0].getY()) - (this->shape.getVertices()[i].getY() * this->shape.getVertices()[0].getX());
+                area += (this->shape->getVertices()[i].getX() * this->shape->getVertices()[0].getY()) - (this->shape->getVertices()[i].getY() * this->shape->getVertices()[0].getX());
             }
             else
             {
-                area += (this->shape.getVertices()[i].getX() * this->shape.getVertices()[i+1].getY()) - (this->shape.getVertices()[i].getY() * this->shape.getVertices()[i+1].getX());
+                area += (this->shape->getVertices()[i].getX() * this->shape->getVertices()[i+1].getY()) - (this->shape->getVertices()[i].getY() * this->shape->getVertices()[i+1].getX());
             }
         }
         area = area / 2;
@@ -157,6 +160,17 @@ void Plot::setShape(Polygon<int,float> shape)
     catch (const runtime_error& e) {
         cout << "Error: " << e.what() << endl;
     }
+}
+
+/**
+ * @brief Set the shape of the plot. Also computes the area of the plot and throws an error if the area is negative or null
+ * 
+ * @param shape 
+ */
+void Plot::setShape(Polygon<int,float>* shape)
+{
+    this->shape = shape;
+    this->calculateArea();
 }
 
 /**
@@ -199,7 +213,7 @@ int Plot::getPBuildable() const
 ostream& operator<<(ostream& os, const Plot& p)
 {
     os << "Plot number: " << p.number << endl;
-    os << "\t" << p.shape << endl;
+    os << "\t" << *(p.shape) << endl;
     os << "\tOwner: " << p.owner << endl;
     os << "\tArea: " << p.area << " m2" << endl;
     return os;
@@ -213,7 +227,7 @@ ostream& operator<<(ostream& os, const Plot& p)
  * @param shape 
  * @param pBuildable // default value is 0
  */
-Buildable::Buildable(int number, string owner, Polygon<int,float> shape, int pBuildable) : Plot(number, owner, shape, pBuildable)
+Buildable::Buildable(int number, string owner, Polygon<int,float>* shape, int pBuildable) : Plot(number, owner, shape, pBuildable)
 {
 }
 
@@ -243,7 +257,7 @@ Buildable::~Buildable()
  * @param pBuildable 
  * @param builtArea Default value is 0 if not specified 
  */
-UrbanZone::UrbanZone(int number, string owner, Polygon<int,float> shape, int pBuildable, float builtArea) : Plot(number, owner, shape, pBuildable), Buildable(number, owner, shape, pBuildable)
+UrbanZone::UrbanZone(int number, string owner, Polygon<int,float>* shape, int pBuildable, float builtArea) : Plot(number, owner, shape, pBuildable), Buildable(number, owner, shape, pBuildable)
 {
     if (!builtArea) { //if builtArea is not specified, we generate a random value between 0 and the maximum buildable area
         float maxBuiltArea = getArea() * (static_cast<float>(getPBuildable()) / 100.0f);
@@ -316,7 +330,7 @@ ostream& operator<<(ostream& os, const UrbanZone& u)
 {
     os << "Plot number: " << u.getNumber() << endl;
     os << "\tType: " << PlotTypeToString(u.getType()) << endl;
-    os << "\t" << u.getShape() << endl;
+    os << "\t" << *(u.getShape()) << endl;
     os << "\tOwner: " << u.getOwner() << endl;
     os << "\tArea: " << u.getArea() << " m2" << endl;
     os << "\tBuildable area: " <<  u.getPBuildable() << "%" <<  endl;
@@ -333,7 +347,7 @@ ostream& operator<<(ostream& os, const UrbanZone& u)
  * @param shape 
  * @param pBuildable 
  */
-ZoneToBeUrbanized::ZoneToBeUrbanized(int number, string owner, Polygon<int,float> shape, int pBuildable) : Plot(number, owner, shape, pBuildable), Buildable(number, owner, shape, pBuildable)
+ZoneToBeUrbanized::ZoneToBeUrbanized(int number, string owner, Polygon<int,float>* shape, int pBuildable) : Plot(number, owner, shape, pBuildable), Buildable(number, owner, shape, pBuildable)
 {
     this->setType(PlotType::ZONE_TO_BE_URBANIZED);
 }
@@ -387,7 +401,7 @@ ostream& operator<<(ostream& os, const ZoneToBeUrbanized& z)
 {
     os << "Plot number: " << z.getNumber() << endl;
     os << "\tType: " << PlotTypeToString(z.getType()) << endl;
-    os << "\t" << z.getShape() << endl;
+    os << "\t" << *(z.getShape()) << endl; 
     os << "\tOwner: " << z.getOwner() << endl;
     os << "\tArea: " << z.getArea() << " m2" << endl;
     os << "\tBuildable area: " <<  z.getPBuildable() << "%" <<  endl;
@@ -401,7 +415,7 @@ ostream& operator<<(ostream& os, const ZoneToBeUrbanized& z)
  * @param owner 
  * @param shape 
  */
-NaturalAndForestZone::NaturalAndForestZone(int number, string owner, Polygon<int,float> shape) : Plot(number, owner, shape, 0)
+NaturalAndForestZone::NaturalAndForestZone(int number, string owner, Polygon<int,float>* shape) : Plot(number, owner, shape, 0)
 {
     this->setType(PlotType::NATURAL_AND_FOREST_ZONE);
 }
@@ -444,7 +458,7 @@ ostream& operator<<(ostream& os, const NaturalAndForestZone& n)
 {
     os << "Plot number: " << n.getNumber() << endl;
     os << "\tType: " << PlotTypeToString(n.getType()) << endl;
-    os << "\t" << n.getShape() << endl;
+    os << "\t" << *(n.getShape()) << endl;
     os << "\tOwner: " << n.getOwner() << endl;
     os << "\tArea: " << n.getArea() << " m2" << endl;
     return os;
@@ -458,7 +472,7 @@ ostream& operator<<(ostream& os, const NaturalAndForestZone& n)
  * @param shape 
  * @param cropType 
  */
-AgriculturalZone::AgriculturalZone(int number, string owner, Polygon<int,float> shape, string cropType) : Plot(number, owner, shape, 0), Buildable(number, owner, shape, 0), NaturalAndForestZone(number, owner, shape)
+AgriculturalZone::AgriculturalZone(int number, string owner, Polygon<int,float>* shape, string cropType) : Plot(number, owner, shape, 0), Buildable(number, owner, shape, 0), NaturalAndForestZone(number, owner, shape)
 {
 
     this->setType(PlotType::AGRICULTURAL_ZONE);
@@ -527,7 +541,7 @@ ostream& operator<<(ostream& os, const AgriculturalZone& a)
 {
     os << "Plot number: " << a.getNumber() << endl;
     os << "\tType: " << PlotTypeToString(a.getType()) << endl;
-    os << "\t" << a.getShape() << endl;
+    os << "\t" << *(a.getShape()) << endl;
     os << "\tOwner: " << a.getOwner() << endl;
     os << "\tArea: " << a.getArea() << " m2" << endl;
     os << "\tCrop type: " << a.getCropType() << endl;

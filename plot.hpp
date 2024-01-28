@@ -46,24 +46,25 @@ class Plot
         int number;
         string owner;
         float area; // in square meters
-        Polygon<int,float> shape;
+        Polygon<int,float>* shape;
         int pBuildable; // percentage of buildable area of the plot
     protected:
         PlotType type;
     public:
-        Plot(int number, string owner, Polygon<int,float> shape, int pBuildable);
+        Plot(int number, string owner, Polygon<int,float>* shape, int pBuildable);
         Plot(const Plot& p);
         ~Plot();
         int getPBuildable() const;
         int getNumber() const;
         string getOwner() const;
         float getArea() const;
-        Polygon<int,float> getShape() const;
+        Polygon<int,float>* getShape() const;
         PlotType getType() const;
         void setNumber(int number);
         void setOwner(string owner);
-        void setShape(Polygon<int,float> shape);
+        void setShape(Polygon<int,float>* shape);
         void setPBuildable(int pBuildable);
+        void calculateArea();
         virtual void setType(PlotType type) = 0;
 
         friend ostream& operator<<(ostream& os, const Plot& p);
@@ -75,7 +76,7 @@ class Plot
 class Buildable : public virtual Plot
 {
     public:
-        Buildable(int number, string owner, Polygon<int,float> shape, int pBuildable = 0);
+        Buildable(int number, string owner, Polygon<int,float>* shape, int pBuildable = 0);
         Buildable(const Buildable& b);
         ~Buildable();
         virtual void setType(PlotType type) = 0;
@@ -90,7 +91,7 @@ class UrbanZone : public Buildable
     private:
         float builtArea;
     public:
-        UrbanZone(int number, string owner, Polygon<int,float> shape, int pBuildable, float builtArea = 0);
+        UrbanZone(int number, string owner, Polygon<int,float>* shape, int pBuildable, float builtArea = 0);
         UrbanZone(const UrbanZone& u);
         ~UrbanZone();
         void setType(PlotType type);
@@ -105,7 +106,7 @@ class UrbanZone : public Buildable
 class ZoneToBeUrbanized : public Buildable
 {
     public:
-        ZoneToBeUrbanized(int number, string owner, Polygon<int,float> shape, int pBuildable);
+        ZoneToBeUrbanized(int number, string owner, Polygon<int,float>* shape, int pBuildable);
         ZoneToBeUrbanized(const ZoneToBeUrbanized& z);
         ~ZoneToBeUrbanized();
         void setType(PlotType type);
@@ -119,7 +120,7 @@ class ZoneToBeUrbanized : public Buildable
 class NaturalAndForestZone : public virtual Plot
 {
     public:
-        NaturalAndForestZone(int number, string owner, Polygon<int,float> shape);
+        NaturalAndForestZone(int number, string owner, Polygon<int,float>* shape);
         NaturalAndForestZone(const NaturalAndForestZone& n);
         ~NaturalAndForestZone();
         void setType(PlotType type);
@@ -134,7 +135,7 @@ class AgriculturalZone : public NaturalAndForestZone, public Buildable
     private:
         string cropType;
     public:
-        AgriculturalZone(int number, string owner, Polygon<int,float> shape, string cropType);
+        AgriculturalZone(int number, string owner, Polygon<int,float>* shape, string cropType);
         AgriculturalZone(const AgriculturalZone& a);
         ~AgriculturalZone();
         void setType(PlotType type);

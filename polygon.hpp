@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include "point2d.hpp"
+#include <functional>
 
 #ifndef POLYGON_HPP
 #define POLYGON_HPP
@@ -33,15 +34,23 @@ class Polygon
 {
     private:
         vector<Point2D<T, U>> vertices;
+        vector<function<void()>> observers;
+        void notifyObservers() {
+            for (const auto& observer : observers){
+                observer();
+            }
+                
+        }
     public:
         Polygon();
         ~Polygon();
         Polygon(vector<Point2D<T, U>> vertices);
         Polygon(const Polygon<T, U>& p);
         vector<Point2D<T, U>> getVertices() const;
-        void setVertices(vector<Point2D<T, U>> vertices);
-        void addVertex(Point2D<T, U> p);
+        void setVertices(const vector<Point2D<T, U>> &vertices);
+        void addVertex(const Point2D<T, U> &p);
         void translate(T dx, U dy);
+        void addObserver(function<void()> observer); 
 
         friend ostream& operator<< <T, U>(ostream& os, const Polygon& p);
 };
@@ -115,9 +124,10 @@ vector<Point2D<T, U>> Polygon<T, U>::getVertices() const
  * @param vertices 
  */
 template <typename T, typename U>
-void Polygon<T, U>::setVertices(vector<Point2D<T, U>> vertices)
+void Polygon<T, U>::setVertices(const vector<Point2D<T, U>> &vertices)
 {
     this->vertices = vertices;
+    notifyObservers();
 }
 
 /**
@@ -128,9 +138,10 @@ void Polygon<T, U>::setVertices(vector<Point2D<T, U>> vertices)
  * @param p 
  */
 template <typename T, typename U>
-void Polygon<T, U>::addVertex(Point2D<T, U> p)
+void Polygon<T, U>::addVertex(const Point2D<T, U> &p)
 {
     this->vertices.push_back(p);
+    notifyObservers();
 }
 
 /**
@@ -148,6 +159,19 @@ void Polygon<T, U>::translate(T dx, U dy)
     {
         this->vertices[i].translate(dx, dy);
     }
+}
+
+/**
+ * @brief Add an observer to the polygon
+ * 
+ * @tparam T 
+ * @tparam U 
+ * @param observer 
+ */
+template <typename T, typename U>
+void Polygon<T, U>::addObserver(function<void()> observer)
+{
+    observers.push_back(observer);
 }
 
 /**
